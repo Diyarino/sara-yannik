@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ein Brief an Euch</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,11 +29,12 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             font-family: 'Inter', sans-serif;
-            min-height: 100vh;
+            height: 100vh; /* Fixierte Höhe auf den Viewport */
+            width: 100vw;
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow-x: hidden;
+            overflow: hidden; /* Verhindert jegliches Scrollen der Hauptseite */
             position: relative;
         }
 
@@ -44,14 +45,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1; /* Unter den Herzen */
+            z-index: -1;
             overflow: hidden;
             pointer-events: none;
-            transition: opacity 1.5s ease-in-out; /* Für das weiche Ausblenden */
+            transition: opacity 1.5s ease-in-out;
             opacity: 1;
         }
 
-        /* Wenn der Button geklickt wird, wird dieser Container ausgeblendet */
         .background-video-container.fade-out {
             opacity: 0;
         }
@@ -64,8 +64,8 @@
             top: 0;
             left: 0;
             opacity: 0;
-            filter: grayscale(100%); /* Schwarz-weiß */
-            transition: opacity 1.5s ease-in-out; /* Weiche Überblendung zwischen Video 1 und 2 */
+            filter: grayscale(100%);
+            transition: opacity 1.5s ease-in-out;
         }
 
         .bg-video.active {
@@ -125,16 +125,17 @@
         .heart:nth-child(9)  { --start-x: 50vw;  --end-x: 40vw;  --scale: 0.7; animation-duration: 17s; animation-delay: 9s; }
         .heart:nth-child(10) { --start-x: 70vw;  --end-x: 60vw;  --scale: 0.6; animation-duration: 26s; animation-delay: 0s; }
 
-        /* Container */
+        /* Haupt-Container füllt den Screen und zentriert alles perfekt */
         .main-container {
             position: relative;
             width: 100%;
             max-width: 600px;
-            margin: 40px 20px;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 1;
+            padding: 20px;
         }
 
         /* INTRO BEREICH */
@@ -143,6 +144,10 @@
             text-align: center;
             transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
             width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .intro-title {
@@ -151,7 +156,7 @@
             letter-spacing: 4px;
             color: var(--text-main);
             font-weight: 300;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             opacity: 0;
             transition: transform 0.8s ease;
             animation: fadeInSimple 2s ease-out forwards;
@@ -238,8 +243,12 @@
 
         /* BRIEF BEREICH */
         .letter-wrapper {
-            width: 100%;
-            padding: 50px 40px;
+            position: absolute;
+            width: calc(100% - 40px);
+            max-height: 85vh; /* Begrenzt die Höhe des Briefs auf dem Bildschirm */
+            display: flex;
+            flex-direction: column;
+            padding: 40px 35px;
             background: var(--card-bg);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
@@ -263,14 +272,33 @@
             text-transform: uppercase;
             letter-spacing: 3px;
             color: var(--text-muted);
-            margin-bottom: 35px;
+            margin-bottom: 25px;
             font-weight: 600;
+            flex-shrink: 0; /* Verhindert, dass die Anrede gestaucht wird */
+        }
+
+        /* Nur der Text-Inhalt scrollt, falls er zu lang für den Bildschirm wird */
+        .content {
+            overflow-y: auto; 
+            padding-right: 8px;
+        }
+
+        /* Schicker, dezenter Scrollbalken für Mobilgeräte & Browser innerhalb des Briefs */
+        .content::-webkit-scrollbar {
+            width: 4px;
+        }
+        .content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
         }
 
         .content p {
             font-size: 1.05rem;
-            line-height: 1.9;
-            margin-bottom: 28px;
+            line-height: 1.8;
+            margin-bottom: 24px;
             color: var(--text-main);
             font-weight: 300;
         }
@@ -278,33 +306,17 @@
         .content p:last-child { margin-bottom: 0; }
 
         .footer-section {
-            margin-top: 50px;
+            margin-top: 30px;
             border-top: 1px solid var(--card-border);
-            padding-top: 25px;
-        }
-
-        .signature-label {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            font-weight: 300;
-            margin-bottom: 8px;
-        }
-
-        .handwritten-signature {
-            font-family: 'Alex Brush', cursive;
-            font-size: 2.2rem;
-            color: #ffffff;
-            letter-spacing: 1px;
-            text-shadow: 0 0 10px rgba(255,255,255,0.1); 
-            margin-top: -5px;
+            padding-top: 20px;
+            flex-shrink: 0; /* Verhindert, dass die Signatur gestaucht wird */
         }
 
         @keyframes fadeInSimple { to { opacity: 1; } }
 
         @media (max-width: 600px) {
-            .letter-wrapper { padding: 35px 25px; }
-            .content p { font-size: 1rem; line-height: 1.8; }
-            .handwritten-signature { font-size: 1.9rem; }
+            .letter-wrapper { padding: 30px 20px; max-height: 80vh; }
+            .content p { font-size: 0.95rem; line-height: 1.7; }
         }
     </style>
 </head>
@@ -379,7 +391,6 @@
 
         let timeouts = [];
 
-        // Funktion um Text elegant zu wechseln
         function changeMessage(newText) {
             passMessage.style.opacity = 0;
             setTimeout(() => {
@@ -388,15 +399,12 @@
             }, 400);
         }
 
-        // Steuerung der Videosequenz mit halber Geschwindigkeit
         function playVideoSequence() {
             video1.playbackRate = 0.5;
             video2.playbackRate = 0.5;
 
-            // Startet direkt mit dem ersten Video
             playFirstVideo();
 
-            // Loop-Wechsel zwischen Video 1 und Video 2
             video1.addEventListener('ended', playSecondVideo);
             video2.addEventListener('ended', playFirstVideo);
         }
@@ -417,21 +425,19 @@
             video1.pause();
         }
 
-        // WICHTIG: Die Videosequenz startet jetzt SOFORT beim Laden der Seite
+        // Videos direkt starten
         playVideoSequence();
 
-
         openBtn.addEventListener('click', () => {
-            // NEU: Video-Container weich ausblenden
+            // Videos weich ausblenden
             videoContainer.classList.add('fade-out');
             
-            // Nach dem Ausblenden (1.5s) die Videos komplett stoppen, um CPU zu sparen
             setTimeout(() => {
                 video1.pause();
                 video2.pause();
             }, 1500);
 
-            // Button ausblenden und Passwort-Feld zeigen
+            // Button verbergen, Passwort anzeigen
             openBtn.style.opacity = 0;
             mainTitle.style.transform = 'translateY(-15px)';
             
@@ -440,7 +446,6 @@
                 passwordSection.classList.add('visible');
                 passInput.focus();
                 
-                // Humorvolle Timer-Sequenz
                 timeouts.push(setTimeout(() => changeMessage("Leute, habt ihr es vergessen?"), 5000));
                 timeouts.push(setTimeout(() => changeMessage("Wir werden alle durch KI ersetzt..."), 10000));
                 timeouts.push(setTimeout(() => changeMessage("Oh man eh... das Passwort ist schwertfisch."), 15000));
@@ -448,7 +453,6 @@
             }, 400);
         });
 
-        // Event-Listener für die Eingabe
         passInput.addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase().trim();
             
