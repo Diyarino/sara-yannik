@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ein Brief an Euch</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d0d0f;
+            --text-main: #f0f0f0;
+            --text-muted: #a0a0a0;
+            --heart-color: rgba(220, 20, 60, 0.5); 
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --success-color: #4ade80;
+            --base-heart-size: 12px; 
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* HINTERGRUND-VIDEOS */
+        .background-video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Unter den Herzen */
+            overflow: hidden;
+            pointer-events: none;
+            transition: opacity 1.5s ease-in-out; /* Für das weiche Ausblenden */
+            opacity: 1;
+        }
+
+        /* Wenn der Button geklickt wird, wird dieser Container ausgeblendet */
+        .background-video-container.fade-out {
+            opacity: 0;
+        }
+
+        .bg-video {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            filter: grayscale(100%); /* Schwarz-weiß */
+            transition: opacity 1.5s ease-in-out; /* Weiche Überblendung zwischen Video 1 und 2 */
+        }
+
+        .bg-video.active {
+            opacity: 1;
+        }
+
+        /* Hintergrund-Animation: Fliegende Herzen */
+        .hearts-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .heart {
+            position: absolute;
+            bottom: -5vh;
+            width: var(--base-heart-size);
+            height: var(--base-heart-size);
+            background-color: var(--heart-color);
+            transform: rotate(45deg);
+            animation: floatRandom infinite ease-in-out;
+            opacity: 0;
+        }
+
+        .heart::before,
+        .heart::after {
+            content: '';
+            position: absolute;
+            width: var(--base-heart-size);
+            height: var(--base-heart-size);
+            background-color: var(--heart-color);
+            border-radius: 50%;
+        }
+
+        .heart::before { top: calc(-1 * var(--base-heart-size) / 2); left: 0; }
+        .heart::after { top: 0; left: calc(-1 * var(--base-heart-size) / 2); }
+
+        @keyframes floatRandom {
+            0% { transform: translateY(0vh) translateX(var(--start-x)) rotate(45deg) scale(var(--scale)); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(-120vh) translateX(var(--end-x)) rotate(45deg) scale(var(--scale)); opacity: 0; }
+        }
+
+        .heart:nth-child(1)  { --start-x: 10vw;  --end-x: -5vw;  --scale: 0.6; animation-duration: 22s; animation-delay: 0s; }
+        .heart:nth-child(2)  { --start-x: 25vw;  --end-x: 15vw;  --scale: 0.8; animation-duration: 18s; animation-delay: 3s; }
+        .heart:nth-child(3)  { --start-x: 40vw;  --end-x: 50vw;  --scale: 0.5; animation-duration: 25s; animation-delay: 5s; }
+        .heart:nth-child(4)  { --start-x: 60vw;  --end-x: 55vw;  --scale: 0.9; animation-duration: 20s; animation-delay: 1s; }
+        .heart:nth-child(5)  { --start-x: 75vw;  --end-x: 85vw;  --scale: 0.7; animation-duration: 23s; animation-delay: 8s; }
+        .heart:nth-child(6)  { --start-x: 90vw;  --end-x: 95vw;  --scale: 0.6; animation-duration: 21s; animation-delay: 4s; }
+        .heart:nth-child(7)  { --start-x: 15vw;  --end-x: 20vw;  --scale: 0.5; animation-duration: 19s; animation-delay: 2s; }
+        .heart:nth-child(8)  { --start-x: 30vw;  --end-x: 10vw;  --scale: 0.8; animation-duration: 24s; animation-delay: 6s; }
+        .heart:nth-child(9)  { --start-x: 50vw;  --end-x: 40vw;  --scale: 0.7; animation-duration: 17s; animation-delay: 9s; }
+        .heart:nth-child(10) { --start-x: 70vw;  --end-x: 60vw;  --scale: 0.6; animation-duration: 26s; animation-delay: 0s; }
+
+        /* Container */
+        .main-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 40px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
+
+        /* INTRO BEREICH */
+        .intro-wrapper {
+            position: absolute;
+            text-align: center;
+            transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+        }
+
+        .intro-title {
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--text-main);
+            font-weight: 300;
+            margin-bottom: 40px;
+            opacity: 0;
+            transition: transform 0.8s ease;
+            animation: fadeInSimple 2s ease-out forwards;
+        }
+
+        .open-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-main);
+            padding: 14px 36px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            opacity: 0;
+            animation: fadeInSimple 2s ease-out forwards;
+            animation-delay: 0.6s;
+        }
+
+        .open-btn:hover {
+            border-color: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.03);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        /* PASSWORT BEREICH */
+        .password-section {
+            display: none;
+            opacity: 0;
+            flex-direction: column;
+            align-items: center;
+            transition: opacity 0.8s ease;
+        }
+
+        .password-section.visible {
+            display: flex;
+            opacity: 1;
+        }
+
+        .pass-message {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            min-height: 24px;
+            transition: opacity 0.4s ease, color 0.4s ease;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .password-input {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            font-size: 1.2rem;
+            padding: 10px;
+            text-align: center;
+            outline: none;
+            width: 250px;
+            letter-spacing: 2px;
+            transition: all 0.4s ease;
+        }
+
+        .password-input:focus {
+            border-bottom-color: rgba(255, 255, 255, 0.7);
+        }
+
+        .password-input.success {
+            border-bottom-color: var(--success-color);
+            color: var(--success-color);
+            text-shadow: 0 0 15px rgba(74, 222, 128, 0.4);
+            letter-spacing: 5px;
+        }
+
+        .intro-wrapper.hidden {
+            opacity: 0;
+            transform: translateY(-40px);
+            pointer-events: none;
+        }
+
+        /* BRIEF BEREICH */
+        .letter-wrapper {
+            width: 100%;
+            padding: 50px 40px;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
+            opacity: 0;
+            transform: translateY(40px);
+            pointer-events: none;
+            transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1), transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .letter-wrapper.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .salutation {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--text-muted);
+            margin-bottom: 35px;
+            font-weight: 600;
+        }
+
+        .content p {
+            font-size: 1.05rem;
+            line-height: 1.9;
+            margin-bottom: 28px;
+            color: var(--text-main);
+            font-weight: 300;
+        }
+
+        .content p:last-child { margin-bottom: 0; }
+
+        .footer-section {
+            margin-top: 50px;
+            border-top: 1px solid var(--card-border);
+            padding-top: 25px;
+        }
+
+        .signature-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 300;
+            margin-bottom: 8px;
+        }
+
+        .handwritten-signature {
+            font-family: 'Alex Brush', cursive;
+            font-size: 2.2rem;
+            color: #ffffff;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.1); 
+            margin-top: -5px;
+        }
+
+        @keyframes fadeInSimple { to { opacity: 1; } }
+
+        @media (max-width: 600px) {
+            .letter-wrapper { padding: 35px 25px; }
+            .content p { font-size: 1rem; line-height: 1.8; }
+            .handwritten-signature { font-size: 1.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="background-video-container" id="videoContainer">
+        <video class="bg-video" id="video1" muted playsinline>
+            <source src="back1.mp4" type="video/mp4">
+            Ihr Browser unterstützt keine HTML5-Videos.
+        </video>
+        <video class="bg-video" id="video2" muted playsinline>
+            <source src="back2.mp4" type="video/mp4">
+            Ihr Browser unterstützt keine HTML5-Videos.
+        </video>
+    </div>
+
+    <div class="hearts-container">
+        <div class="heart"></div><div class="heart"></div><div class="heart"></div>
+        <div class="heart"></div><div class="heart"></div><div class="heart"></div>
+        <div class="heart"></div><div class="heart"></div><div class="heart"></div><div class="heart"></div>
+    </div>
+
+    <div class="main-container">
+
+        <div class="intro-wrapper" id="introView">
+            <h1 class="intro-title" id="mainTitle">Für Sara & Yannik</h1>
+            <button class="open-btn" id="openBtn">Brief öffnen</button>
+            
+            <div class="password-section" id="passwordSection">
+                <div class="pass-message" id="passMessage">Bitte gib das Passwort ein.</div>
+                <input type="password" class="password-input" id="passInput" placeholder="..." autocomplete="off">
+            </div>
+        </div>
+
+        <div class="letter-wrapper" id="letterView">
+            <div class="salutation">Liebe Sara, lieber Yannik,</div>
+            
+            <div class="content">
+                <p>
+                    Anouk hat mir schon früh gesagt: Wenn die beiden nicht zusammenfinden, ergibt diese Welt keinen Sinn. Sie sah in euch schon immer das absolute Traumpaar. Wie die Hauptdarsteller aus High School Musical (nur das Yannik nicht singen kann). Anfangs dachte ich noch: man... ich bin mit einem Kind zusammen, aber mittlerweile sehe ich es ganz genauso. Ihr passt einfach perfekt zusammen, und wenn ihr mich fragt, ist dieser Tag schon längst überfällig.
+                </p>
+                <p>
+                    Sara, Yannik kann sich glücklich schätzen, dich an seiner Seite zu haben. balbalbalbablablablbal.
+                </p>
+                <p>
+                    Zu sehen, wie ihr beide miteinander lacht, euch gegenseitig unterstützt und Schritt für Schritt eure gemeinsame Zukunft aufbaut, erfüllt die ganze Family+. Ihr zeigt, was wahre Liebe und Zusammenhalt bedeuten.
+                </p>
+                <p>
+                    Ich wünsche euch von ganzem Herzen, dass dieses Gefühl euch ein Leben lang begleitet, dass eure Liebe mit jedem Jahr intensiver wird und ihr niemals aufhört, einander so anzusehen, wie ihr es heute tut.
+                </p>
+            </div>
+
+            <div class="footer-section">
+                <div class="salutation">Diyar</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const openBtn = document.getElementById('openBtn');
+        const introView = document.getElementById('introView');
+        const mainTitle = document.getElementById('mainTitle');
+        const passwordSection = document.getElementById('passwordSection');
+        const passMessage = document.getElementById('passMessage');
+        const passInput = document.getElementById('passInput');
+        const letterView = document.getElementById('letterView');
+        const videoContainer = document.getElementById('videoContainer');
+
+        const video1 = document.getElementById('video1');
+        const video2 = document.getElementById('video2');
+
+        let timeouts = [];
+
+        // Funktion um Text elegant zu wechseln
+        function changeMessage(newText) {
+            passMessage.style.opacity = 0;
+            setTimeout(() => {
+                passMessage.innerText = newText;
+                passMessage.style.opacity = 1;
+            }, 400);
+        }
+
+        // Steuerung der Videosequenz mit halber Geschwindigkeit
+        function playVideoSequence() {
+            video1.playbackRate = 0.5;
+            video2.playbackRate = 0.5;
+
+            // Startet direkt mit dem ersten Video
+            playFirstVideo();
+
+            // Loop-Wechsel zwischen Video 1 und Video 2
+            video1.addEventListener('ended', playSecondVideo);
+            video2.addEventListener('ended', playFirstVideo);
+        }
+
+        function playFirstVideo() {
+            video1.classList.add('active');
+            video2.classList.remove('active');
+            video1.currentTime = 0;
+            video1.play().catch(e => console.log("Autoplay blockiert oder Fehler:", e));
+            video2.pause();
+        }
+
+        function playSecondVideo() {
+            video2.classList.add('active');
+            video1.classList.remove('active');
+            video2.currentTime = 0;
+            video2.play().catch(e => console.log("Fehler bei Video 2:", e));
+            video1.pause();
+        }
+
+        // WICHTIG: Die Videosequenz startet jetzt SOFORT beim Laden der Seite
+        playVideoSequence();
+
+
+        openBtn.addEventListener('click', () => {
+            // NEU: Video-Container weich ausblenden
+            videoContainer.classList.add('fade-out');
+            
+            // Nach dem Ausblenden (1.5s) die Videos komplett stoppen, um CPU zu sparen
+            setTimeout(() => {
+                video1.pause();
+                video2.pause();
+            }, 1500);
+
+            // Button ausblenden und Passwort-Feld zeigen
+            openBtn.style.opacity = 0;
+            mainTitle.style.transform = 'translateY(-15px)';
+            
+            setTimeout(() => {
+                openBtn.style.display = 'none';
+                passwordSection.classList.add('visible');
+                passInput.focus();
+                
+                // Humorvolle Timer-Sequenz
+                timeouts.push(setTimeout(() => changeMessage("Leute, habt ihr es vergessen?"), 5000));
+                timeouts.push(setTimeout(() => changeMessage("Wir werden alle durch KI ersetzt..."), 10000));
+                timeouts.push(setTimeout(() => changeMessage("Oh man eh... das Passwort ist schwertfisch."), 15000));
+                
+            }, 400);
+        });
+
+        // Event-Listener für die Eingabe
+        passInput.addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase().trim();
+            
+            if (val === 'schwertfisch') {
+                timeouts.forEach(t => clearTimeout(t));
+                
+                passInput.classList.add('success');
+                passInput.disabled = true;
+                
+                passMessage.style.opacity = 0;
+                setTimeout(() => {
+                    passMessage.innerText = "Zugriff gewährt.";
+                    passMessage.style.color = "var(--success-color)";
+                    passMessage.style.opacity = 1;
+                }, 400);
+
+                setTimeout(() => {
+                    introView.classList.add('hidden');
+                    
+                    setTimeout(() => {
+                        letterView.classList.add('visible');
+                    }, 800);
+                }, 1800);
+            }
+        });
+    </script>
+
+</body>
+</html>
